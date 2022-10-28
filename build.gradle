@@ -1,10 +1,24 @@
+buildscript {
+  repositories {
+    maven {
+      url "https://plugins.gradle.org/m2/"
+    }
+  }
+  dependencies {
+    classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4.20.0"
+  }
+}
+allprojects {
+    repositories {
+        maven {
+            url "http://35.92.201.109:8081/artifactory/gradle-dev/"
+        }
+    }
+}
 allprojects {
     apply plugin: 'java'
     apply plugin: 'war'
 
-    group = 'org.cloudacademy.example.webapp'
-    version = '1.0'
-    status = 'integration'
 }
 
 java {
@@ -40,4 +54,30 @@ dependencies {
     runtime 'org.apache.logging.log4j:log4j-core:2.10.0'
     runtime 'com.fasterxml.jackson.core:jackson-databind:2.9.3'
     runtime 'com.github.docker-java:docker-java:3.2.1'
+}
+artifactory {
+    contextUrl = "${artifactory_contextUrl}"   //The base Artifactory URL if not overridden by the publisher/resolver
+    publish {
+        repository {
+            repoKey = 'gradle-dev-local'
+            username = "${artifactory_user}"
+            password = "${artifactory_password}"
+            maven = true
+            
+        }
+        defaults {
+            publications('mavenJava')
+            publishArtifacts = true
+            publishPom = true
+        }
+    }
+    resolve {
+        repository {
+            repoKey = 'gradle-dev'
+            username = "${artifactory_user}"
+            password = "${artifactory_password}"
+            maven = true
+            
+        }
+    }
 }
